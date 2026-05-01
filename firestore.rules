@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Hardened helpers
+    function isSignedIn() { return request.auth != null; }
+    function isAdmin() { return isSignedIn() && (request.auth.token.email == 'mrkhatab112@gmail.com' || request.auth.token.email == 'rkkhatab872@gmail.com'); }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    function isValidApplication(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 200 &&
+             data.mobile is string && data.mobile.size() >= 10 && data.mobile.size() <= 15 &&
+             data.email is string && data.email.size() > 0 && data.email.size() <= 200 &&
+             data.project is string && data.project.size() > 0 &&
+             data.amount is number && data.amount >= 0 &&
+             data.utr is string && data.utr.size() >= 8 && data.utr.size() <= 100 &&
+             data.appId is string && data.appId.size() > 0 &&
+             data.status in ['pending', 'approved', 'rejected'] &&
+             data.createdAt is timestamp;
+    }
+
+    match /applications/{applicationId} {
+      allow create: if isValidId(applicationId) && 
+                      isValidApplication(incoming()) && 
+                      incoming().status == 'pending' &&
+                      incoming().createdAt == request.time;
+      
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /settings/{settingId} {
+      allow read: if true; // Public settings (UPI ID, etc)
+      allow write: if isAdmin();
+    }
+  }
+}

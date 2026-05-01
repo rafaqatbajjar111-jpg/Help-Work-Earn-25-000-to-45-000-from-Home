@@ -1,0 +1,52 @@
+{
+  "entities": {
+    "Application": {
+      "title": "Application",
+      "description": "User application for typing projects",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "mobile": { "type": "string" },
+        "email": { "type": "string" },
+        "project": { "type": "string" },
+        "amount": { "type": "number" },
+        "utr": { "type": "string" },
+        "appId": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "mobile", "email", "project", "amount", "utr", "appId", "status", "createdAt"]
+    },
+    "PaymentSettings": {
+      "title": "Payment Settings",
+      "description": "Admin settings for payment",
+      "type": "object",
+      "properties": {
+        "upiId": { "type": "string" },
+        "qr": { "type": "string" }
+      }
+    },
+    "ConfigSettings": {
+      "title": "Config Settings",
+      "description": "General admin config",
+      "type": "object",
+      "properties": {
+        "whatsapp": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "applications/{applicationId}": {
+      "schema": "Application",
+      "description": "List of all user applications"
+    },
+    "settings/payment": {
+      "schema": "PaymentSettings",
+      "description": "Payment configuration"
+    },
+    "settings/config": {
+      "schema": "ConfigSettings",
+      "description": "General configuration"
+    }
+  }
+}
